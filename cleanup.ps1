@@ -5,7 +5,7 @@ $esxis = @("10.10.5.250", "10.10.5.251")
 $esxipassword = 'VMware1!'
 
 foreach ($esxi in $esxis) {
-    connect-viserver -server $esxi -user root -password $esxipassword -ErrorAction Stop
+    Connect-VIServer -server $esxi -user root -password $esxipassword 
     Get-VM -Name vcf-* | Stop-VM -Confirm:$false -ErrorAction SilentlyContinue
     Get-VM -Name vcf-* | Remove-VM -DeletePermanently -Confirm:$false
     if (Get-VM -Name $vcentervm -ErrorAction SilentlyContinue) {
@@ -16,6 +16,6 @@ foreach ($esxi in $esxis) {
 
 sleep 600
 
-connect-viserver -server $vcenterip -user $vcenteruser -password $vcenterpw
+Connect-VIServer -server $vcenterip -user $vcenteruser -password $vcenterpw
 Get-VApp -Name 'Nested-VCF-*' | Remove-VApp -DeletePermanently -Confirm:$false
-disconnect-viserver * -Confirm:$false
+Disconnect-VIServer * -Confirm:$false
