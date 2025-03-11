@@ -5,24 +5,17 @@ $esxis = @("10.10.5.250", "10.10.5.251")
 $esxipassword = 'VMware1!'
 
 foreach ($esxi in $esxis) {
-    Connect-VIserver -server $esxi -user root -password $esxipassword 
-    Get-VM -Name vcf-* | Stop-VM -Confirm:$false
+    connect-viserver -server $esxi -user root -password $esxipassword -ErrorAction Stop
+    Get-VM -Name vcf-* | Stop-VM -Confirm:$false -ErrorAction SilentlyContinue
     Get-VM -Name vcf-* | Remove-VM -DeletePermanently -Confirm:$false
     if (Get-VM -Name $vcentervm -ErrorAction SilentlyContinue) {
         Get-VM -Name $vcentervm | Start-VM
     }
-    Disconnect-VIServer -server 10.10.5.250 -Confirm:$false 
+    Disconnect-VIServer -server $esxi -Confirm:$false -ErrorAction SilentlyContinue
 }
 
-while ($true) {
-    try {
-        Connect-VIserver -server $vcenterip -user administrator@vsphere.local -password $vcenterpw
-        Get-VApp -Name 'Nested-VCF-*' | Remove-VApp -DeletePermanently -Confirm:$false -ErrorAction SilentlyContinue
-        Disconnect-VIServer * -Confirm:$false 
-        exit
-    }
-    catch {
-        Write-Host "Sleep 1min and try to connect to vcenter"
-        sleep 60
-    }
-}
+sleep 600
+
+connect-viserver -server $vcenterip -user $vcenteruser -password $vcenterpw
+Get-VApp -Name 'Nested-VCF-*' | Remove-VApp -DeletePermanently -Confirm:$false
+disconnect-viserver * -Confirm:$false
